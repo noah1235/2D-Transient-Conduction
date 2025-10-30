@@ -38,18 +38,22 @@ class BC_Stencil(ABC):
             comp, T_boundary, boundary_heat_flux = self.upwind_BC_ctrl(T, i, j, t)
         BC_debug = (T_boundary_list is not None) and (q_boundary_list is not None)
         if BC_debug:
+            q_sign = 1
+            if self.side == "right" or self.side == "top":
+                q_sign = -1
+
             if self.side == "left" or self.side == "right":
                 T_boundary_list[j] = T_boundary
-                q_boundary_list[j] = boundary_heat_flux
+                q_boundary_list[j] = q_sign * boundary_heat_flux
                 if isinstance(self, Conv_BC_Stencil):
                     h, T_inf = self.conv_BC[j, t]
-                    conv_boundary_list[j] = h * (T_boundary - T_inf)
+                    conv_boundary_list[j] = h * (T_inf - T_boundary)
             else:
                 T_boundary_list[i] = T_boundary
-                q_boundary_list[i] = boundary_heat_flux
+                q_boundary_list[i] = q_sign * boundary_heat_flux
                 if isinstance(self, Conv_BC_Stencil):
                     h, T_inf = self.conv_BC[i, t]
-                    conv_boundary_list[i] = h * (T_boundary - T_inf)
+                    conv_boundary_list[i] = h * (T_inf - T_boundary)
 
         return comp
         
@@ -193,7 +197,6 @@ class Temp_BC_Stencil(BC_Stencil):
 
         return dT_i__dxj, d2T_i__dxj2, T_boundary, dT_b__dxj
 
-
 class Heat_Flux_BC_Stencil(BC_Stencil):
     def __init__(self, Delta_x, Delta_y, int_stencil: Interior_FD, q_BC, k):
         self.Delta_x = Delta_x
@@ -260,10 +263,10 @@ class Heat_Flux_BC_Stencil(BC_Stencil):
             z = z_fn(a)
             w = w_fn(a)
             T_b = T_b_fn(y, z, w)
-            return a - self.a_fn(T_b, Delta_xj, BC_dict)
+            return a + self.a_fn(T_b, Delta_xj, BC_dict)
 
         k_i, _ = self.k(T_i)
-        a0 = self.a_fn(T_i, Delta_xj, BC_dict)
+        a0 = -self.a_fn(T_i, Delta_xj, BC_dict)
         
         #a = a0
         a = newton(F, x0=a0)
@@ -282,7 +285,6 @@ class Heat_Flux_BC_Stencil(BC_Stencil):
 
         return dT_i__dxj, d2T_i__dxj2, T_boundary, dT_b__dxj
     
-
 class Conv_BC_Stencil(Heat_Flux_BC_Stencil):
     def __init__(self, Delta_x, Delta_y, int_stencil: Interior_FD, conv_BC, k):
         self.Delta_x = Delta_x
@@ -298,4 +300,4 @@ class Conv_BC_Stencil(Heat_Flux_BC_Stencil):
     def a_fn(self, T_b, Delta_xj, BC_dict):
         h, T_inf = BC_dict["h"], BC_dict["T_inf"]
         k_b = self.k(T_b)[0]
-        return (h*(T_inf-T_b)*Delta_xj) / (k_b)
+        return -(h*(T_inf-T_b)*Delta_xj) / (k_b)

@@ -12,14 +12,14 @@ class Temp_BC:
         return self.T[i]
 
 class Sin_Temp_BC():
-    def __init__(self, mean, A, P, phi, side):
+    def __init__(self, mean, A, P, phi):
         self.const_mean = isinstance(mean, (int, float))
         self.const_A = isinstance(A, (int, float))
         self.mean = mean
         self.A = A
         self.P = P
         self.phi = phi
-        self.side = side
+
     
     def __getitem__(self, key):
         i, t = key
@@ -27,3 +27,15 @@ class Sin_Temp_BC():
         mean = self.mean if self.const_mean else self.mean[i]
         return A * np.sin((2*np.pi)/self.P * t + self.phi) + mean
 
+class T_Wave_BC():
+    def __init__(self, mean, A, P, vel, Delta_xj):
+        self.mean = mean
+        self.A = A
+        self.vel = vel
+        self.P = P
+        self.Delta_xj = Delta_xj
+    
+    def __getitem__(self, key):
+        i, t = key
+        x = i * self.Delta_xj
+        return self.A * np.sin((2*np.pi)/self.P * x + self.vel * t) + self.mean

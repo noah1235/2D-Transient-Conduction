@@ -5,7 +5,6 @@ from SRC.BCs.Q_internal_BC import Q
 from typing import Callable, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
-import jax
 class Sim_Manager:
     def __init__(self, Nx, Ny, Delta_x, Delta_y, Q_gen: Q,
                  interior_stencil: Interior_FD,
