@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
+import matplotlib as mpl
+from SRC.plotting.utils import save_svg, set_grid
 
 def plot_q_residual_T_BC(
     BC_debug, t_eval,
     q_label="Boundary heat flux", q_units="W/m²",
     T_label="Boundary temperature", T_units="K",
-    title=None,
     boundaries=None,  # e.g., ("left","right"); default = all
+    save_path=None
 ):
     """
     Parameters
@@ -58,6 +60,7 @@ def plot_q_residual_T_BC(
         1, 3, figsize=(16, 4.8), sharex=True, constrained_layout=True
     )
 
+
     # --- Panel 1: q(t)
     line_handles = {}
     for b in sel_names:
@@ -68,7 +71,11 @@ def plot_q_residual_T_BC(
     ax_q.set_xlabel("Time")
     ax_q.set_ylabel(f"{q_label} [{q_units}]")
     ax_q.set_title("Boundary Heat Flux q(t)")
-    ax_q.grid(True, alpha=0.3)
+
+    # → Enable scientific notation for y-axis
+    ax_q.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    ax_q.yaxis.get_offset_text().set_fontsize(9)  # optional, smaller offset text
+    set_grid(ax_q)
     if sel_names:
         ax_q.legend(loc="best")
 
@@ -84,8 +91,6 @@ def plot_q_residual_T_BC(
             resid = conv_j - q[:, j]
             ax_res.plot(
                 t_eval, resid,
-                linestyle="--", linewidth=1.8,
-                marker="o", markersize=3.5, markevery=markevery,
                 color=line_handles[j].get_color(),
                 label=f"{idx_to_pretty[j]} (conv − q)",
                 zorder=3, path_effects=stroke
@@ -96,7 +101,11 @@ def plot_q_residual_T_BC(
     ax_res.set_xlabel("Time")
     ax_res.set_ylabel(f"Residual [{q_units}]")
     ax_res.set_title("Residual: (conv − q)")
-    ax_res.grid(True, alpha=0.3)
+
+    # → Enable scientific notation for residual plot as well
+    ax_res.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    ax_res.yaxis.get_offset_text().set_fontsize(9)
+    set_grid(ax_res)
     if any_residual:
         ax_res.legend(loc="best")
 
@@ -108,11 +117,11 @@ def plot_q_residual_T_BC(
     ax_T.set_xlabel("Time")
     ax_T.set_ylabel(f"{T_label} [{T_units}]")
     ax_T.set_title("Boundary Temperature T(t)")
-    ax_T.grid(True, alpha=0.3)
+    set_grid(ax_T)
     if sel_names:
         ax_T.legend(loc="best")
 
-    if title:
-        fig.suptitle(title, y=1.04)
+    if save_path.lower().endswith(".svg"):
+        save_svg(mpl, fig, save_path)
 
     return fig, (ax_q, ax_res, ax_T)
