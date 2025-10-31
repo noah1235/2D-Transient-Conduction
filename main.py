@@ -19,7 +19,6 @@ from SRC.FD_stencils.BC_Stencil import (
 )
 
 # --- IC/plotting/utils ---
-import matplotlib.pyplot as plt  # (import kept for parity, even if not used directly here)
 from SRC.plotting.ts_ani import animate_trj
 from SRC.plotting.BC_plotting import plot_q_residual_T_BC
 import numpy as np
