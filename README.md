@@ -4,6 +4,9 @@ This is the code for a 2D transient conduction simulation in python using finite
 - Time and space dependant convection, heat flux, and temperature boundary conditions.
 - Time and space depndant energy generation.
 
+Details on the finite difference algorithim can be found here
+[Solver_Details.pdf](https://github.com/user-attachments/files/23266602/Solver_Details.pdf)
+
 ## Example - Constant temperature boundary conditions.
 https://github.com/user-attachments/assets/54bc73f4-fb37-4866-a6f3-88b738ee0897
 
