@@ -1,47 +1,93 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+
 class Q(ABC):
+    """
+    Abstract base class for volumetric heat-generation fields.
+
+    Implementations must be callable like:
+        q_field = q_model(T, t)
+
+    Parameters to __call__:
+        T : ndarray
+            Current temperature field (may be unused by simple models).
+        t : float
+            Current simulation time (may be unused by steady models).
+
+    Returns:
+        ndarray with the same spatial shape as T, containing volumetric
+        heat-generation values (units per your solver convention, e.g. W/m^3).
+    """
+
     @abstractmethod
     def __call__(self, T, t):
         pass
 
-class Q_gen(Q):
-    def __init__(self, Q):
-        self.Q = Q
-    
-    def __call__(self, T, t):
-        return self.Q
-    
 
 class Q_gen_cent_square:
+    """
+    Spatially localized, time-invariant heat source: a constant-valued
+    rectangular region centered in the domain.
+
+    The rectangle’s size is specified as fractions of the domain extents:
+        width_x  = px * Nx
+        width_y  = py * Ny
+
+    Everything outside that centered rectangle is zero.
+
+    Notes
+    -----
+    - Indexing is computed using integer truncation; for odd sizes, the
+      centered region can be off by one cell due to rounding. This mirrors
+      the original logic exactly.
+    - The source is independent of T and t.
+    """
+
     def __init__(self, Q_val: float, Nx: int, Ny: int, px: float, py: float):
+        """
+        Parameters
+        ----------
+        Q_val : float
+            Constant source value inside the centered rectangle.
+        Nx, Ny : int
+            Grid sizes in x and y (number of cells/nodes).
+        px, py : float in [0, 1]
+            Fractions of the domain dimensions covered by the source
+            along x and y, respectively (e.g., px=0.25 → 25% of Nx).
+        """
+        # Allocate full-domain source field; initialized to zero
         self.Q = np.zeros((Nx, Ny))
 
-        # Compute half-width indices for the central square
+        # Compute half-margins (in cells) left/right and bottom/top so that
+        # the remaining middle region spans px*Nx by py*Ny cells.
         half_x = int((1 - px) * Nx / 2)
         half_y = int((1 - py) * Ny / 2)
 
-        # Ensure indices stay valid
+        # Clamp to valid index ranges
         x_start, x_end = half_x, Nx - half_x
         y_start, y_end = half_y, Ny - half_y
 
+        # Fill the centered rectangle with Q_val
         self.Q[x_start:x_end, y_start:y_end] = Q_val
 
     def __call__(self, T: np.ndarray, t: float) -> np.ndarray:
-        """Return the source field (independent of T, t)."""
+        """
+        Return the (time- and temperature-independent) source field.
+
+        Parameters
+        ----------
+        T : ndarray
+            Temperature field (unused).
+        t : float
+            Time (unused).
+
+        Returns
+        -------
+        ndarray
+            Precomputed source field with the same (Nx, Ny) shape used at init.
+        """
         return self.Q
-    
-
-
-from abc import ABC, abstractmethod
-import numpy as np
-
-class Q(ABC):
-    @abstractmethod
-    def __call__(self, T, t):
-        pass
-
 
 class QSpatioTemporalArt(Q):
     """

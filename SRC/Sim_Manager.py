@@ -1,10 +1,9 @@
 from SRC.FD_stencils.interior_FD import Interior_FD
 from SRC.FD_stencils.BC_Stencil import BC_Stencil, Conv_BC_Stencil
-import matplotlib.pyplot as plt
 from SRC.BCs.Q_internal_BC import Q
-from typing import Callable, Tuple
 import numpy as np
 from scipy.integrate import solve_ivp
+
 class Sim_Manager:
     def __init__(self, Nx, Ny, Delta_x, Delta_y, Q_gen: Q,
                  interior_stencil: Interior_FD,
@@ -32,10 +31,11 @@ class Sim_Manager:
 
 
     def RHS(self, t: float, T: np.ndarray):
+        #array to store approximation of the right hand side of conduction PDE
         output = np.zeros((self.Nx, self.Ny))
-        #interior nodes
         crho = self.c(T) * self.rho(T)
-
+        
+        #interior nodes
         for i in range(1, self.Nx-1):
             for j in range(1, self.Ny-1):
                 output[i, j] += self.interior_stencil(i, j, T)
@@ -165,12 +165,11 @@ class Sim_Manager:
 
         return BC_debug
 
-    
     def _rhs_flat(self, t: float, y_flat: np.ndarray) -> np.ndarray:
         """solve_ivp-compatible RHS that maps (t, y_flat) -> y_flat'."""
         T = y_flat.reshape(self.Nx, self.Ny)
-        dTdt = self.RHS(t, T)               # <-- your function above
-        return dTdt.ravel(order="C")        # 1D flatten
+        dTdt = self.RHS(t, T)  
+        return dTdt.ravel(order="C") 
 
     def __call__(self, T0, t_span, t_eval, method="RK45"):
         assert T0.shape == (self.Nx, self.Ny)
