@@ -31,9 +31,9 @@ def main():
     # Geometry & grid parameters
     # ---------------------------
     Lx = 0.3  # [m] domain length in x
-    Ly = 0.3  # [m] domain length in y
-    Nx = 20   # number of cells in x
-    Ny = 20   # number of cells in y
+    Ly = 0.1  # [m] domain length in y
+    Nx = 40   # number of cells in x
+    Ny = 5   # number of cells in y
     Delta_x = Lx / Nx
     Delta_y = Ly / Ny
 
@@ -68,7 +68,7 @@ def main():
     int_stencil = Interior_Central_Diff_Stencil(Nx, Ny, Delta_x, Delta_y, k)
 
     # ----------------------------------------------------------------
-    # BOUNDARY CONDITIONS: Dirichlet (isothermal)
+    # BOUNDARY CONDITIONS: Dirichlet
     # ----------------------------------------------------------------
     left_BC = Temp_BC_Stencil(
         Delta_x, Delta_y, int_stencil, 
@@ -79,7 +79,8 @@ def main():
 
     top_BC = Temp_BC_Stencil(
         Delta_x, Delta_y, int_stencil, 
-        Const_Temp_BC(300), 
+        #Const_Temp_BC(300), 
+        Const_Heat_Flux_BC(0),
         #Sin_Temp_BC(mean=np.ones(Ny)*300, A=50, P=5, phi=np.pi/2),
         #T_Wave_BC(mean=300, A=100, P=0.08, vel=0.2, Delta_xj=Delta_y),
         k)
@@ -93,46 +94,49 @@ def main():
 
     bot_BC = Temp_BC_Stencil(
         Delta_x, Delta_y, int_stencil, 
-        Const_Temp_BC(300), 
+        #Const_Temp_BC(300), 
+        Const_Heat_Flux_BC(0),
         #Sin_Temp_BC(mean=np.ones(Ny)*300, A=50, P=5, phi=np.pi/2),
         #T_Wave_BC(mean=300, A=100, P=0.08, vel=0.2, Delta_xj=Delta_y),
         k)
 
-    # ----------------------------------------------------------------
-    # BOUNDARY CONDITIONS: Convection
-    # ----------------------------------------------------------------
-    left_BC  = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                               Const_Conv_BC(100, 400), 
-                               #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
-                               k)
-    top_BC   = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                               Const_Conv_BC(100, 400), 
-                               #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
-                               k)
-    right_BC = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                               Const_Conv_BC(100, 400), 
-                               #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
-                               k)
-    bot_BC   = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                               Const_Conv_BC(100, 400), 
-                               #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
-                               k)
+    if False:
+        # ----------------------------------------------------------------
+        # BOUNDARY CONDITIONS: Convection
+        # ----------------------------------------------------------------
+        left_BC  = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                Const_Conv_BC(100, 400), 
+                                #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
+                                k)
+        top_BC   = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                Const_Conv_BC(100, 400), 
+                                #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
+                                k)
+        right_BC = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                Const_Conv_BC(100, 400), 
+                                #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
+                                k)
+        bot_BC   = Conv_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                Const_Conv_BC(100, 400), 
+                                #Time_Space_Conv_BC(h0=100, T0=400, Delta_xj=Delta_x, amp_h=10, k_h=10),
+                                k)
 
-    # ----------------------------------------------------------------
-    # BOUNDARY CONDITIONS: Heat flux
-    # ----------------------------------------------------------------
-    left_BC = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                                    Const_Heat_Flux_BC(10000), 
-                                    k)
-    top_BC  = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                                    Const_Heat_Flux_BC(10000), 
-                                    k)
-    right_BC   = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                                    Const_Heat_Flux_BC(10000), 
-                                    k)
-    bot_BC   = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
-                                    Const_Heat_Flux_BC(10000), 
-                                    k)
+    if False:
+        # ----------------------------------------------------------------
+        # BOUNDARY CONDITIONS: Heat flux
+        # ----------------------------------------------------------------
+        left_BC = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                        Const_Heat_Flux_BC(10000), 
+                                        k)
+        top_BC  = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                        Const_Heat_Flux_BC(10000), 
+                                        k)
+        right_BC   = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                        Const_Heat_Flux_BC(10000), 
+                                        k)
+        bot_BC   = Heat_Flux_BC_Stencil(Delta_x, Delta_y, int_stencil, 
+                                        Const_Heat_Flux_BC(10000), 
+                                        k)
 
     # ---------------------------
     # Simulation setup
