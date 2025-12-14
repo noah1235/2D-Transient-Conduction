@@ -18,3 +18,9 @@ https://github.com/user-attachments/assets/aceb7fa4-e8f7-4841-a32a-75e582728952
 
 ## Example - 0 heat flux (left and right boundaries) spatio-temporal convection (top and bottom boundaries
 https://github.com/user-attachments/assets/e074f734-f73e-40e8-a8a9-cf921e7cd8ea
+
+## Example - Inputting temperature dependant material properties
+This is an example input file for temperature dependant material properties for aluminum. The variable "T_tbl" is an array of temperatures, "k_tbl" 
+is a parrallel array of thermal conductivies, "rho_tbl" is a parrallel array of densities, and "c_tbl" is a parrallel array of specific heats. With this information
+the solver will perform linear intperolation to output temperature dependant material properties.
+<img width="693" height="332" alt="Image" src="https://github.com/user-attachments/assets/cc505f7e-be8e-4aa1-8918-9a0eb05efff6" />
